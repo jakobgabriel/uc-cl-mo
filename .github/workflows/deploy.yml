@@ -8,9 +8,11 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,26 +30,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload build artifact
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-
-  deploy:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          branch: gh-pages
+          folder: dist
