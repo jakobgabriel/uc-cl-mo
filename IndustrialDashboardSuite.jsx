@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gauge, ClipboardList, Zap, Activity, Package, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
+import { Gauge, ClipboardList, Zap, Activity, Package, Monitor, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
 
 // ============================================
 // MOCK DATA GENERATION
@@ -357,6 +357,111 @@ const ProductionTrackingDashboard = ({ darkMode }) => {
 };
 
 // ============================================
+// ANDON BOARD DASHBOARD
+// ============================================
+
+const andonMachineData = [
+  { workplace: '19108102', machine: 'EQ40096236', feederStatus: 'Running', benderStatus: 'Running', shift1: 413, shift2: 317, shift3: 0, lastPart: '2026-02-04 18:01:41', benderDowntime: 3.11, downtimeUnit: 'hour' },
+  { workplace: '19108101', machine: 'EQ40095872', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 0, shift2: 0, shift3: 0, lastPart: null, benderDowntime: 12.0, downtimeUnit: 'hour' },
+  { workplace: '19108106', machine: 'EQ40095559', feederStatus: 'Running', benderStatus: 'Running', shift1: 794, shift2: 386, shift3: 0, lastPart: '2026-02-04 18:01:48', benderDowntime: 2.08, downtimeUnit: 'hour' },
+  { workplace: '19108107', machine: 'EQ40097683', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 1069, shift2: 0, shift3: 0, lastPart: '2026-02-04 13:38:54', benderDowntime: 4.39, downtimeUnit: 'hour' },
+  { workplace: '19108108', machine: 'EQ40098823', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 0, shift2: 0, shift3: 0, lastPart: null, benderDowntime: 12.0, downtimeUnit: 'hour' },
+  { workplace: '19108103', machine: 'EQ40089281', feederStatus: 'Running', benderStatus: 'Running', shift1: 805, shift2: 422, shift3: 0, lastPart: '2026-02-04 18:01:43', benderDowntime: 33.8, downtimeUnit: 'min' },
+];
+
+const AndonBoardDashboard = ({ darkMode }) => {
+  const [machines, setMachines] = useState(andonMachineData);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+      setMachines(prev => prev.map(m => {
+        if (m.feederStatus === 'Running') {
+          return {
+            ...m,
+            shift2: m.shift2 + Math.floor(Math.random() * 2),
+            benderDowntime: Math.max(0, m.benderDowntime + (Math.random() - 0.5) * 0.01),
+          };
+        }
+        return m;
+      }));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateTime = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  };
+
+  const StatusBadge = ({ status }) => (
+    <span className={`inline-block px-6 py-2 rounded text-white font-bold text-lg ${
+      status === 'Running' ? 'bg-green-500' : 'bg-red-500'
+    }`}>
+      {status}
+    </span>
+  );
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Andon Board
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Bending Line Overview - Real-time Machine Status
+          </p>
+        </div>
+        <div className="text-right">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Last Updated</div>
+          <div className="text-lg font-bold font-mono text-gray-900 dark:text-white">{formatDateTime(currentTime)}</div>
+        </div>
+      </div>
+
+      <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-800 border-b border-gray-700">
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Workplace</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Machine</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Feeder Status</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Bender Status</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Shift 1</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Shift 2</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Shift 3</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Last Part Produced</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Bender Downtime</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-800">
+              {machines.map((m, i) => (
+                <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+                  <td className="px-6 py-5 text-center text-white text-lg font-mono">{m.workplace}</td>
+                  <td className="px-6 py-5 text-center text-white text-lg font-mono">{m.machine}</td>
+                  <td className="px-6 py-5 text-center"><StatusBadge status={m.feederStatus} /></td>
+                  <td className="px-6 py-5 text-center"><StatusBadge status={m.benderStatus} /></td>
+                  <td className="px-6 py-5 text-center text-white text-2xl font-bold">{m.shift1}</td>
+                  <td className="px-6 py-5 text-center text-white text-2xl font-bold">{m.shift2}</td>
+                  <td className="px-6 py-5 text-center text-white text-2xl font-bold">{m.shift3}</td>
+                  <td className="px-6 py-5 text-center text-white text-lg font-mono">{m.lastPart || '–'}</td>
+                  <td className="px-6 py-5 text-center text-white">
+                    <span className="text-3xl font-bold">{m.benderDowntime.toFixed(1)}</span>
+                    <span className="text-lg ml-1 text-gray-400">{m.downtimeUnit}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
 // COMING SOON VIEW
 // ============================================
 
@@ -402,6 +507,13 @@ export default function App() {
       icon: ClipboardList,
       description: 'Hourly production monitoring and KPIs',
       component: ProductionTrackingDashboard
+    },
+    {
+      id: 'andon-board',
+      name: 'Andon Board',
+      icon: Monitor,
+      description: 'Real-time machine status and shift output',
+      component: AndonBoardDashboard
     },
     {
       id: 'energy-management',
