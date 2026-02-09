@@ -361,12 +361,12 @@ const ProductionTrackingDashboard = ({ darkMode }) => {
 // ============================================
 
 const andonMachineData = [
-  { workplace: '19108102', machine: 'EQ40096236', feederStatus: 'Running', benderStatus: 'Running', shift1: 413, shift2: 317, shift3: 0, lastPart: '2026-02-04 18:01:41', benderDowntime: 3.11, downtimeUnit: 'hour' },
-  { workplace: '19108101', machine: 'EQ40095872', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 0, shift2: 0, shift3: 0, lastPart: null, benderDowntime: 12.0, downtimeUnit: 'hour' },
-  { workplace: '19108106', machine: 'EQ40095559', feederStatus: 'Running', benderStatus: 'Running', shift1: 794, shift2: 386, shift3: 0, lastPart: '2026-02-04 18:01:48', benderDowntime: 2.08, downtimeUnit: 'hour' },
-  { workplace: '19108107', machine: 'EQ40097683', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 1069, shift2: 0, shift3: 0, lastPart: '2026-02-04 13:38:54', benderDowntime: 4.39, downtimeUnit: 'hour' },
-  { workplace: '19108108', machine: 'EQ40098823', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 0, shift2: 0, shift3: 0, lastPart: null, benderDowntime: 12.0, downtimeUnit: 'hour' },
-  { workplace: '19108103', machine: 'EQ40089281', feederStatus: 'Running', benderStatus: 'Running', shift1: 805, shift2: 422, shift3: 0, lastPart: '2026-02-04 18:01:43', benderDowntime: 33.8, downtimeUnit: 'min' },
+  { workplace: 'WP-1001', machine: 'BND-A01', feederStatus: 'Running', benderStatus: 'Running', shift1: 420, shift2: 310, shift3: 0, lastPart: '2026-02-04 18:01:41', benderDowntime: 3.1, downtimeUnit: 'hour' },
+  { workplace: 'WP-1002', machine: 'BND-A02', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 0, shift2: 0, shift3: 0, lastPart: null, benderDowntime: 12.0, downtimeUnit: 'hour' },
+  { workplace: 'WP-1003', machine: 'BND-B01', feederStatus: 'Running', benderStatus: 'Running', shift1: 790, shift2: 385, shift3: 0, lastPart: '2026-02-04 18:01:48', benderDowntime: 2.1, downtimeUnit: 'hour' },
+  { workplace: 'WP-1004', machine: 'BND-B02', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 1070, shift2: 0, shift3: 0, lastPart: '2026-02-04 13:38:54', benderDowntime: 4.4, downtimeUnit: 'hour' },
+  { workplace: 'WP-1005', machine: 'BND-C01', feederStatus: 'Stopped', benderStatus: 'Stopped', shift1: 0, shift2: 0, shift3: 0, lastPart: null, benderDowntime: 12.0, downtimeUnit: 'hour' },
+  { workplace: 'WP-1006', machine: 'BND-C02', feederStatus: 'Running', benderStatus: 'Running', shift1: 800, shift2: 420, shift3: 0, lastPart: '2026-02-04 18:01:43', benderDowntime: 33.8, downtimeUnit: 'min' },
 ];
 
 const AndonBoardDashboard = ({ darkMode }) => {
