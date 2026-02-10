@@ -2,94 +2,85 @@ import React, { useState, useEffect } from 'react';
 import { Gauge, ClipboardList, Zap, Activity, Package, Monitor, BarChart3, Thermometer, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
 
 // ============================================
-// MOCK DATA GENERATION
+// CURING OVEN DATA GENERATION
 // ============================================
 
-const generateTemperatureData = () => {
+const generateCuringTempData = () => {
   const data = [];
   for (let i = 0; i < 100; i++) {
-    const hour = 10 + Math.floor(i * 12 / 60);
+    const hour = 10 + Math.floor(i * 24 / 100);
     const adjustedHour = hour >= 24 ? hour - 24 : hour;
-    
-    let temp, setpoint;
-    if (adjustedHour < 20) {
-      temp = 227 + Math.random() * 2;
-      setpoint = 228;
-    } else if (adjustedHour >= 20 && adjustedHour < 22) {
-      const progress = (adjustedHour - 20) / 2;
-      temp = 227 - progress * 192 + Math.random() * 5;
-      setpoint = 228 - progress * 193;
-    } else if (adjustedHour >= 22 || adjustedHour < 4) {
-      temp = 35 + Math.random() * 5;
-      setpoint = 35;
+    const minutes = Math.floor(((i * 24 / 100) % 1) * 60);
+    const timeLabel = `${String(adjustedHour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    let actual, setpoint = 228;
+    if (i < 25) {
+      actual = 226 + Math.random() * 4;
+    } else if (i < 45) {
+      actual = 225 + Math.random() * 6;
+    } else if (i < 55) {
+      const progress = (i - 45) / 10;
+      actual = 228 - progress * 195 + Math.random() * 5;
+      setpoint = 228 - progress * 195;
+    } else if (i < 75) {
+      actual = 32 + Math.random() * 3;
+      setpoint = 32;
     } else {
-      const progress = (adjustedHour - 4) / 6;
-      temp = 35 + progress * 192 + Math.random() * 5;
-      setpoint = 35 + progress * 193;
+      const progress = (i - 75) / 25;
+      actual = 32 + progress * 196 + Math.random() * 5;
+      setpoint = 32 + progress * 196;
     }
-    
+
+    const minVal = actual - 8 - Math.random() * 2;
+    const maxVal = actual + 9 + Math.random() * 2;
     data.push({
-      actual: Math.max(30, Math.min(240, temp)),
-      setpoint: Math.max(30, Math.min(240, setpoint)),
-      min: Math.max(30, Math.min(240, temp - 10)),
-      max: Math.max(30, Math.min(240, temp + 11))
+      time: timeLabel,
+      actual: Math.max(20, Math.min(250, actual)),
+      setpoint: Math.max(20, Math.min(250, setpoint)),
+      min: Math.max(20, Math.min(250, minVal)),
+      max: Math.max(20, Math.min(250, maxVal)),
+      index: i
     });
   }
   return data;
 };
 
-const generateConveyorData = () => {
+const generateCuringConveyorData = () => {
   const data = [];
   for (let i = 0; i < 100; i++) {
-    const hour = 10 + Math.floor(i * 12 / 60);
+    const hour = 10 + Math.floor(i * 24 / 100);
     const adjustedHour = hour >= 24 ? hour - 24 : hour;
-    
-    let speed = (adjustedHour >= 2 && adjustedHour < 4) ? 0 : 0.0999 + (Math.random() - 0.5) * 0.002;
-    
-    data.push({
-      actual: Math.max(0, speed),
-      setpoint: 0.1
-    });
-  }
-  return data;
-};
+    const minutes = Math.floor(((i * 24 / 100) % 1) * 60);
+    const timeLabel = `${String(adjustedHour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-const generateStatusData = () => {
-  const data = [];
-  for (let i = 0; i < 100; i++) {
-    const hour = 10 + Math.floor(i * 12 / 60);
-    const adjustedHour = hour >= 24 ? hour - 24 : hour;
-    
+    let actual = (i >= 55 && i < 75) ? 0 : 0.0999 + (Math.random() - 0.5) * 0.002;
     data.push({
-      status: (adjustedHour >= 2 && adjustedHour < 4) ? 'Stopped' : 'Running'
+      time: timeLabel,
+      actual: Math.max(0, actual),
+      setpoint: 0.1,
+      status: (i >= 55 && i < 75) ? 'Stopped' : 'Running',
+      index: i
     });
   }
   return data;
 };
 
 // ============================================
-// THERMAL PROCESSING DASHBOARD
+// CURING OVEN DASHBOARD
 // ============================================
 
-const ThermalProcessingDashboard = ({ darkMode }) => {
-  const [tempData] = useState(generateTemperatureData());
-  const [conveyorData] = useState(generateConveyorData());
-  const [statusData] = useState(generateStatusData());
-  
+const CuringOvenDashboard = ({ darkMode }) => {
+  const [tempData] = useState(generateCuringTempData());
+  const [conveyorData] = useState(generateCuringConveyorData());
+
   const [currentTemp, setCurrentTemp] = useState({
-    setpoint: 228,
-    actual: 227,
-    min: 218,
-    max: 238
+    setpoint: 228, actual: 227, min: 218, max: 238
   });
-  
   const [conveyorSpeed, setConveyorSpeed] = useState({
-    setpoint: 0.100,
-    actual: 0.0999
+    setpoint: 0.100, actual: 0.0999
   });
-  
   const [upheatingPeriod, setUpheatingPeriod] = useState(30);
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setUpheatingPeriod(prev => prev + 1);
@@ -102,127 +93,244 @@ const ThermalProcessingDashboard = ({ darkMode }) => {
         actual: 0.0999 + (Math.random() - 0.5) * 0.001
       }));
     }, 1000);
-    
     return () => clearInterval(timer);
   }, []);
-  
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
-  
-  return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Thermal Processing Unit
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Line A | Zone 2 - Real-time Process Control
-          </p>
+
+  // Chart helpers
+  const chartW = 560, padL = 55, padR = 10, padT = 10, padB = 25;
+  const plotW = chartW - padL - padR;
+  const timeLabels = ['10:00','12:00','14:00','16:00','18:00','20:00','22:00','00:00','02:00','04:00','06:00','08:00'];
+
+  const TempChart = () => {
+    const chartH = 170, plotH = chartH - padT - padB;
+    const yMin = 0, yMax = 250;
+    const toX = (i) => padL + (i / (tempData.length - 1)) * plotW;
+    const toY = (v) => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+    return (
+      <div>
+        <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 text-center mb-1">Temperature time series</p>
+        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+          <rect x={padL} y={padT} width={plotW} height={plotH} fill={darkMode ? '#111827' : '#f8fafc'} />
+          {[0, 50, 100, 150, 200, 250].map(v => (
+            <g key={v}>
+              <line x1={padL} y1={toY(v)} x2={padL + plotW} y2={toY(v)} stroke={darkMode ? '#374151' : '#e2e8f0'} strokeWidth="0.5" />
+              <text x={padL - 4} y={toY(v) + 3} textAnchor="end" fontSize="7" fill={darkMode ? '#9ca3af' : '#64748b'}>{v} °C</text>
+            </g>
+          ))}
+          {timeLabels.map((t, i) => (
+            <text key={i} x={padL + (i / (timeLabels.length - 1)) * plotW} y={chartH - 4} textAnchor="middle" fontSize="7" fill={darkMode ? '#9ca3af' : '#64748b'}>{t}</text>
+          ))}
+          {/* Upper/Lower limit lines */}
+          <line x1={padL} y1={toY(238)} x2={padL + plotW} y2={toY(238)} stroke="#ef4444" strokeWidth="1" strokeDasharray="4,2" />
+          <line x1={padL} y1={toY(218)} x2={padL + plotW} y2={toY(218)} stroke="#ef4444" strokeWidth="1" strokeDasharray="4,2" />
+          {/* Setpoint line */}
+          <line x1={padL} y1={toY(228)} x2={padL + plotW} y2={toY(228)} stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="6,3" />
+          {/* Actual temperature */}
+          <polyline
+            points={tempData.map((d, i) => `${toX(i).toFixed(1)},${toY(d.actual).toFixed(1)}`).join(' ')}
+            fill="none" stroke="#22c55e" strokeWidth="1.5" />
+        </svg>
+        <div className="flex justify-center gap-4 mt-1">
+          {[{label:'Min',color:'#ef4444'},{label:'Actual Zone 1',color:'#22c55e'},{label:'Max',color:'#ef4444'},{label:'Setpoint',color:'#f59e0b'}].map(l => (
+            <div key={l.label} className="flex items-center gap-1">
+              <span className="w-3 h-0.5 inline-block" style={{backgroundColor:l.color}} />
+              <span className="text-[9px] text-gray-500 dark:text-gray-400">{l.label}</span>
+            </div>
+          ))}
         </div>
-        <span className="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-lg font-bold text-lg">
-          ● Running
+      </div>
+    );
+  };
+
+  const ConveyorChart = () => {
+    const chartH = 100, plotH = chartH - padT - padB;
+    const yMin = 0, yMax = 0.12;
+    const toX = (i) => padL + (i / (conveyorData.length - 1)) * plotW;
+    const toY = (v) => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+    return (
+      <div>
+        <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 text-center mb-1">Conveyor speed time series</p>
+        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+          <rect x={padL} y={padT} width={plotW} height={plotH} fill={darkMode ? '#111827' : '#f8fafc'} />
+          {[0, 0.05, 0.1].map(v => (
+            <g key={v}>
+              <line x1={padL} y1={toY(v)} x2={padL + plotW} y2={toY(v)} stroke={darkMode ? '#374151' : '#e2e8f0'} strokeWidth="0.5" />
+              <text x={padL - 4} y={toY(v) + 3} textAnchor="end" fontSize="6" fill={darkMode ? '#9ca3af' : '#64748b'}>{v.toFixed(4)} m/min</text>
+            </g>
+          ))}
+          {timeLabels.map((t, i) => (
+            <text key={i} x={padL + (i / (timeLabels.length - 1)) * plotW} y={chartH - 4} textAnchor="middle" fontSize="7" fill={darkMode ? '#9ca3af' : '#64748b'}>{t}</text>
+          ))}
+          <line x1={padL} y1={toY(0.1)} x2={padL + plotW} y2={toY(0.1)} stroke="#f59e0b" strokeWidth="1" strokeDasharray="4,2" />
+          <polyline
+            points={conveyorData.map((d, i) => `${toX(i).toFixed(1)},${toY(d.actual).toFixed(1)}`).join(' ')}
+            fill="none" stroke="#22c55e" strokeWidth="1.5" />
+        </svg>
+        <div className="flex justify-center gap-4 mt-1">
+          {[{label:'Speed actual',color:'#22c55e'},{label:'Speed setpoint',color:'#f59e0b'}].map(l => (
+            <div key={l.label} className="flex items-center gap-1">
+              <span className="w-3 h-0.5 inline-block" style={{backgroundColor:l.color}} />
+              <span className="text-[9px] text-gray-500 dark:text-gray-400">{l.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const ConveyorStatusBar = () => {
+    const chartH = 70, barY = 20, barH = 25;
+    const toX = (i) => padL + (i / (conveyorData.length - 1)) * plotW;
+
+    const segments = [];
+    let segStart = 0, segStatus = conveyorData[0].status;
+    for (let i = 1; i < conveyorData.length; i++) {
+      if (conveyorData[i].status !== segStatus) {
+        segments.push({ start: segStart, end: i - 1, status: segStatus });
+        segStart = i;
+        segStatus = conveyorData[i].status;
+      }
+    }
+    segments.push({ start: segStart, end: conveyorData.length - 1, status: segStatus });
+
+    return (
+      <div>
+        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+          <text x={padL - 4} y={barY + barH / 2 + 3} textAnchor="end" fontSize="7" fill={darkMode ? '#9ca3af' : '#64748b'}>Conveyer</text>
+          {segments.map((seg, i) => {
+            const x1 = toX(seg.start);
+            const x2 = toX(seg.end);
+            return (
+              <g key={i}>
+                <rect x={x1} y={barY} width={x2 - x1} height={barH} fill={seg.status === 'Running' ? '#22c55e' : '#ef4444'} rx="2" />
+                {(x2 - x1) > 40 && (
+                  <text x={(x1 + x2) / 2} y={barY + barH / 2 + 3} textAnchor="middle" fontSize="7" fill="white" fontWeight="bold">{seg.status}</text>
+                )}
+              </g>
+            );
+          })}
+          {timeLabels.map((t, i) => (
+            <text key={i} x={padL + (i / (timeLabels.length - 1)) * plotW} y={chartH - 2} textAnchor="middle" fontSize="7" fill={darkMode ? '#9ca3af' : '#64748b'}>{t}</text>
+          ))}
+          {/* Legend */}
+          <rect x={chartW - 100} y={2} width={8} height={8} fill="#22c55e" rx="1" />
+          <text x={chartW - 88} y={9} fontSize="7" fill={darkMode ? '#d1d5db' : '#475569'}>Running</text>
+          <rect x={chartW - 50} y={2} width={8} height={8} fill="#ef4444" rx="1" />
+          <text x={chartW - 38} y={9} fontSize="7" fill={darkMode ? '#d1d5db' : '#475569'}>Stopped</text>
+        </svg>
+      </div>
+    );
+  };
+
+  return (
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Curing Oven SO-16 | Pass 2
+        </h1>
+        <span className="px-6 py-2 bg-green-600 text-white rounded-lg font-bold text-xl">
+          Running
         </span>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">Active Program</div>
-            <div className="text-blue-600 dark:text-blue-400 text-2xl font-bold">PROC-A-16-STD</div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left column: KPI cards */}
+        <div className="space-y-3">
+          {/* Program Name */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase text-center">Actual Program Name</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 text-center mt-1">SO-16-Convolute</div>
           </div>
-          
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Temperature</div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Setpoint</div>
-                <div className="text-amber-600 dark:text-amber-500 text-3xl font-bold">
-                  {currentTemp.setpoint}<span className="text-xl">°C</span>
-                </div>
+
+          {/* Temperature card */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Temperature</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Setpoint</div>
+                <div className="text-3xl font-bold text-amber-500">{currentTemp.setpoint} <span className="text-lg font-normal">°C</span></div>
               </div>
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Actual</div>
-                <div className="text-green-600 dark:text-green-500 text-3xl font-bold">
-                  {Math.round(currentTemp.actual)}<span className="text-xl">°C</span>
-                </div>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Actual</div>
+                <div className="text-3xl font-bold text-green-500">{Math.round(currentTemp.actual)} <span className="text-lg font-normal">°C</span></div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Minimum</div>
-                <div className="text-blue-600 dark:text-blue-400 text-3xl font-bold">
-                  {currentTemp.min}<span className="text-xl">°C</span>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Minimum</div>
+                <div className="text-3xl font-bold text-blue-500">{currentTemp.min} <span className="text-lg font-normal">°C</span></div>
               </div>
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Maximum</div>
-                <div className="text-red-600 dark:text-red-400 text-3xl font-bold">
-                  {currentTemp.max}<span className="text-xl">°C</span>
-                </div>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Maximum</div>
+                <div className="text-3xl font-bold text-red-500">{currentTemp.max} <span className="text-lg font-normal">°C</span></div>
               </div>
             </div>
           </div>
-          
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Conveyor Speed</div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Setpoint</div>
-                <div className="text-amber-600 dark:text-amber-500 text-2xl font-bold">
-                  {conveyorSpeed.setpoint.toFixed(3)}<span className="text-sm"> m/min</span>
-                </div>
+
+          {/* Conveyor Speed */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Conveyor speed</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Conveyor speed setpoint</div>
+                <div className="text-2xl font-bold text-amber-500">{conveyorSpeed.setpoint.toFixed(3)} <span className="text-sm font-normal">m/min</span></div>
               </div>
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Actual</div>
-                <div className="text-green-600 dark:text-green-500 text-2xl font-bold">
-                  {conveyorSpeed.actual.toFixed(4)}<span className="text-sm"> m/min</span>
-                </div>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Conveyor speed actual</div>
+                <div className="text-2xl font-bold text-green-500">{conveyorSpeed.actual.toFixed(4)} <span className="text-sm font-normal">m/min</span></div>
               </div>
             </div>
           </div>
-          
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="space-y-4">
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Temp Start</div>
-                <div className="text-gray-900 dark:text-white text-lg">2026-02-06 04:22:57</div>
+
+          {/* Timestamps */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Temperature Start Timestamp</div>
               </div>
-              <div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Upheating Period</div>
-                <div className="text-blue-600 dark:text-blue-400 text-4xl font-bold">
-                  {formatTime(upheatingPeriod)}
-                </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Temperature Achieved Timestamp</div>
+                <div className="text-sm font-bold text-gray-900 dark:text-white mt-1">2026-02-06<br/>04:22:57</div>
               </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Upheating period</div>
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400 mt-1 font-mono">{formatTime(upheatingPeriod)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom setpoint / starting temp */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Temperature setpoint</div>
+              <div className="text-4xl font-bold text-green-600 dark:text-green-400 mt-1">228 <span className="text-xl font-normal">°C</span></div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Starting temperature</div>
+              <div className="text-4xl font-bold text-amber-500 mt-1">32 <span className="text-xl font-normal">°C</span></div>
             </div>
           </div>
         </div>
-        
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-4 font-bold">Temperature Timeline (24h)</div>
-            <div className="relative h-64 bg-gray-50 dark:bg-gray-900 rounded-lg">
-              <svg width="100%" height="100%" viewBox="0 0 800 250">
-                {[0, 1, 2, 3, 4, 5].map(i => (
-                  <line key={i} x1="0" y1={i * 50} x2="800" y2={i * 50} 
-                    stroke={darkMode ? "#374151" : "#e5e7eb"} strokeWidth="1"/>
-                ))}
-                {['10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '00:00', '02:00', '04:00', '06:00', '08:00'].map((time, i) => (
-                  <text key={i} x={i * 66.67 + 10} y="245" fill={darkMode ? "#9ca3af" : "#6b7280"} fontSize="10">
-                    {time}
-                  </text>
-                ))}
-                <polyline
-                  points={tempData.map((d, i) => `${i * 8},${250 - (d.setpoint / 250 * 250)}`).join(' ')}
-                  fill="none" stroke="#f59e0b" strokeWidth="2"/>
-                <polyline
-                  points={tempData.map((d, i) => `${i * 8},${250 - (d.actual / 250 * 250)}`).join(' ')}
-                  fill="none" stroke="#10b981" strokeWidth="2"/>
-              </svg>
-            </div>
+
+        {/* Right column: Charts */}
+        <div className="space-y-3">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3">
+            <TempChart />
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3">
+            <ConveyorChart />
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3">
+            <ConveyorStatusBar />
           </div>
         </div>
       </div>
@@ -971,15 +1079,15 @@ const ComingSoonView = ({ title, description, icon: Icon }) => (
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeView, setActiveView] = useState('thermal-processing');
+  const [activeView, setActiveView] = useState('curing-oven');
 
   const useCases = [
     {
-      id: 'thermal-processing',
-      name: 'Thermal Processing',
+      id: 'curing-oven',
+      name: 'Curing Oven Process',
       icon: Gauge,
-      description: 'Real-time temperature and conveyor control',
-      component: ThermalProcessingDashboard
+      description: 'Temperature, conveyor and curing cycle control',
+      component: CuringOvenDashboard
     },
     {
       id: 'production-tracking',
