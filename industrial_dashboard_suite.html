@@ -465,18 +465,18 @@
     };
 
     // ============================================
-    // BMW PRODUCTION TRACKING
+    // PRODUCTION TRACKING
     // ============================================
     
-    const BMWProductionTracking = ({ darkMode }) => {
+    const ProductionTrackingDashboard = ({ darkMode }) => {
       const [currentTime, setCurrentTime] = useState(new Date());
       
       const productionData = [
-        { timeStart: '06:00', timeEnd: '07:00', article: '40-0000-7004-08', target: 97, actual: 80 },
-        { timeStart: '07:00', timeEnd: '08:00', article: '40-0000-7004-08', target: 106, actual: 108 },
-        { timeStart: '08:00', timeEnd: '09:00', article: '40-0000-7004-08', target: 71, actual: 68 },
-        { timeStart: '09:00', timeEnd: '10:00', article: '40-0000-7004-08', target: 106, actual: 94 },
-        { timeStart: '10:00', timeEnd: '11:00', article: '40-0000-7004-08', target: 106, actual: 15 },
+        { timeStart: '06:00', timeEnd: '07:00', article: 'ART-0042-X1', target: 97, actual: 80 },
+        { timeStart: '07:00', timeEnd: '08:00', article: 'ART-0042-X1', target: 106, actual: 108 },
+        { timeStart: '08:00', timeEnd: '09:00', article: 'ART-0042-X1', target: 71, actual: 68 },
+        { timeStart: '09:00', timeEnd: '10:00', article: 'ART-0042-X1', target: 106, actual: 94 },
+        { timeStart: '10:00', timeEnd: '11:00', article: 'ART-0042-X1', target: 106, actual: 15 },
         { timeStart: '11:00', timeEnd: '12:00', article: '—', target: 0, actual: 0 },
         { timeStart: '12:00', timeEnd: '13:00', article: '—', target: 0, actual: 0 },
         { timeStart: '13:00', timeEnd: '14:00', article: '—', target: 0, actual: 0 }
@@ -508,7 +508,7 @@
         <div className="p-6 space-y-6">
           <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg shadow-lg p-6">
             <div className="flex justify-between items-center">
-              <h1 className="text-4xl font-bold text-gray-900">BMW FAAR YELLOW CELL</h1>
+              <h1 className="text-4xl font-bold text-gray-900">ASSEMBLY LINE A — CELL 4</h1>
               <div className="text-right">
                 <div className="text-sm text-gray-700 font-medium">Actual Time</div>
                 <div className="text-2xl font-bold text-gray-900 font-mono">
@@ -1039,7 +1039,7 @@
         heatMaintainMin: 1.7,
         cyclesShift: 12,
         lastCycleTime: 24.4,
-        programNumber: 'AEM (VAMAC)',
+        programNumber: 'PRG-Alpha',
         temperature: 186.00,
         pressure: 10.50,
         setpointPressure: 10.50,
@@ -1054,7 +1054,7 @@
         heatMaintainMin: 0,
         cyclesShift: '-',
         lastCycleTime: '-',
-        programNumber: 'CM CoEx',
+        programNumber: 'PRG-Beta',
         temperature: 27.00,
         pressure: 0,
         setpointPressure: 9.60,
@@ -1319,11 +1319,11 @@
           component: CuringOvenDashboard
         },
         {
-          id: 'bmw-production',
-          name: 'BMW Production Tracking',
+          id: 'production-tracking',
+          name: 'Production Tracking',
           icon: ClipboardList,
           description: 'Hourly production monitoring and KPIs',
-          component: BMWProductionTracking
+          component: ProductionTrackingDashboard
         },
         {
           id: 'andon-board',
