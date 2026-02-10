@@ -727,8 +727,8 @@ export default function App() {
   }, [darkMode]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <nav className="bg-white dark:bg-gray-800 shadow-md shrink-0 z-50">
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -747,9 +747,9 @@ export default function App() {
         </div>
       </nav>
 
-      <div className="flex">
-        <aside className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700`}>
-          <div className="p-4">
+      <div className="flex flex-1 overflow-hidden">
+        <aside className={`${sidebarOpen ? 'w-80' : 'w-0'} shrink-0 transition-all duration-300 overflow-hidden bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700`}>
+          <div className="w-80 h-full overflow-y-auto p-4">
             <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-4">Use Cases</h2>
             <div className="space-y-2">
               {useCases.map(uc => (
@@ -778,7 +778,7 @@ export default function App() {
           </div>
         </aside>
 
-        <main className="flex-1">
+        <main className="flex-1 min-w-0 overflow-auto">
           {ActiveComponent && <ActiveComponent darkMode={darkMode} />}
         </main>
       </div>
