@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gauge, ClipboardList, Zap, Activity, Package, Monitor, BarChart3, Thermometer, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
+import { Gauge, ClipboardList, Zap, Activity, Package, Monitor, BarChart3, Thermometer, Factory, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
 
 // ============================================
 // CURING OVEN DATA GENERATION
@@ -570,6 +570,115 @@ const AndonBoardDashboard = ({ darkMode }) => {
 };
 
 // ============================================
+// MACHINE CARD VIEW DASHBOARD
+// ============================================
+
+const machineCardData = [
+  { id: 'MLD-101', name: 'Molder 101', workplaceId: 'WP-10001', status: 'Automatic', partnumber: 'PN-220750', material: 'MAT-4590', cycleTime: '8.7 min', amountShift: '6 pcs', prevShift: '216 pcs', temperature: '162.5 °C', lastUpdate: '7m 17s ago' },
+  { id: 'MLD-102', name: 'Molder 102', workplaceId: '', status: 'Unknown', partnumber: '-', material: '-', cycleTime: '-', amountShift: '0 pcs', prevShift: '—', temperature: '-', lastUpdate: '-' },
+  { id: 'MLD-103', name: 'Molder 103', workplaceId: '', status: 'Unknown', partnumber: '-', material: '-', cycleTime: '-', amountShift: '0 pcs', prevShift: '—', temperature: '-', lastUpdate: '-' },
+  { id: 'MLD-104', name: 'Molder 104', workplaceId: 'WP-10004', status: 'Setup', partnumber: 'PN-220824', material: 'MAT-4790', cycleTime: '11.4 min', amountShift: '0 pcs', prevShift: '0 pcs', temperature: '172.2 °C', lastUpdate: '9h 10m ago' },
+  { id: 'MLD-105', name: 'Molder 105', workplaceId: 'WP-10005', status: 'Unknown', partnumber: '-', material: '-', cycleTime: '-', amountShift: '0 pcs', prevShift: '—', temperature: '-', lastUpdate: '-' },
+  { id: 'MLD-106', name: 'Molder 106', workplaceId: 'WP-10006', status: 'Automatic', partnumber: 'PN-220750', material: 'MAT-4590', cycleTime: '8.3 min', amountShift: '12 pcs', prevShift: '258 pcs', temperature: '165.1 °C', lastUpdate: '1m 47s ago' },
+  { id: 'MLD-107', name: 'Molder 107', workplaceId: 'WP-10007', status: 'Stop', partnumber: 'PN-220752', material: 'MAT-4090', cycleTime: '10.7 min', amountShift: '0 pcs', prevShift: '54 pcs', temperature: '162.2 °C', lastUpdate: '6h 21m ago' },
+  { id: 'MLD-108', name: 'Molder 108', workplaceId: 'WP-10008', status: 'Manual', partnumber: 'PN-220824', material: 'MAT-4790', cycleTime: '11.1 min', amountShift: '0 pcs', prevShift: '186 pcs', temperature: '177.9 °C', lastUpdate: '57m 17s ago' },
+  { id: 'MLD-109', name: 'Molder 109', workplaceId: '', status: 'Unknown', partnumber: '-', material: '-', cycleTime: '-', amountShift: '0 pcs', prevShift: '—', temperature: '-', lastUpdate: '-' },
+  { id: 'MLD-110', name: 'Molder 110', workplaceId: 'WP-10010', status: 'Automatic', partnumber: 'PN-220760', material: 'MAT-4600', cycleTime: '9.2 min', amountShift: '8 pcs', prevShift: '190 pcs', temperature: '168.3 °C', lastUpdate: '3m 22s ago' },
+  { id: 'MLD-111', name: 'Molder 111', workplaceId: '', status: 'Unknown', partnumber: '-', material: '-', cycleTime: '-', amountShift: '0 pcs', prevShift: '—', temperature: '-', lastUpdate: '-' },
+];
+
+const statusColors = {
+  Automatic: { header: 'bg-green-700', border: 'border-green-600', text: 'text-green-600 dark:text-green-400' },
+  Unknown: { header: 'bg-gray-600', border: 'border-gray-400', text: 'text-gray-500 dark:text-gray-400' },
+  Setup: { header: 'bg-fuchsia-700', border: 'border-fuchsia-500', text: 'text-fuchsia-600 dark:text-fuchsia-400' },
+  Stop: { header: 'bg-red-700', border: 'border-red-500', text: 'text-red-600 dark:text-red-400' },
+  Manual: { header: 'bg-gray-700', border: 'border-yellow-400', text: 'text-yellow-600 dark:text-yellow-400' },
+};
+
+const MachineCard = ({ machine }) => {
+  const colors = statusColors[machine.status] || statusColors.Unknown;
+  const fields = [
+    ['Status', machine.status],
+    ['Partnumber', machine.partnumber],
+    ['Material', machine.material],
+    ['Cycle time', machine.cycleTime],
+    ['Amount parts (shift)', machine.amountShift],
+    ['Prev shift parts', machine.prevShift],
+    ['Temperature', machine.temperature],
+    ['Last update', machine.lastUpdate],
+  ];
+
+  return (
+    <div>
+      <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-1">{machine.name}</p>
+      <div className={`rounded-lg border-2 ${colors.border} overflow-hidden bg-white dark:bg-gray-800 shadow`}>
+        <div className={`${colors.header} px-3 py-2`}>
+          <div className="text-white font-bold text-sm">{machine.name}</div>
+          <div className="text-white/80 text-xs">Workplace ID: {machine.workplaceId || '-'}</div>
+        </div>
+        <div className="px-3 py-2 space-y-1">
+          {fields.map(([label, value]) => (
+            <div key={label} className="flex justify-between items-baseline text-xs">
+              <span className="text-gray-600 dark:text-gray-400">{label}</span>
+              <span className={`font-semibold ${label === 'Status' ? colors.text : 'text-gray-900 dark:text-white'}`}>{value}</span>
+            </div>
+          ))}
+        </div>
+        <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+          <button className="text-xs text-blue-600 dark:text-blue-400 hover:underline">↗ Open Level 2</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MachineCardDashboard = ({ darkMode }) => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const statusCounts = machineCardData.reduce((acc, m) => {
+    acc[m.status] = (acc[m.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Machine Card Overview</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Production molding machines — real-time status</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-2 flex-wrap">
+            {Object.entries(statusCounts).map(([status, count]) => {
+              const colors = statusColors[status] || statusColors.Unknown;
+              return (
+                <span key={status} className={`text-xs px-2 py-1 rounded-full ${colors.header} text-white`}>
+                  {status}: {count}
+                </span>
+              );
+            })}
+          </div>
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {currentTime.toLocaleTimeString('en-GB')}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {machineCardData.map(machine => (
+          <MachineCard key={machine.id} machine={machine} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ============================================
 // HOURLY PRODUCTION OUTPUT DASHBOARD
 // ============================================
 
@@ -1106,6 +1215,13 @@ export default function App() {
       icon: Monitor,
       description: 'Real-time machine status and shift output',
       component: AndonBoardDashboard
+    },
+    {
+      id: 'machine-cards',
+      name: 'Machine Card View',
+      icon: Factory,
+      description: 'Production machine status cards overview',
+      component: MachineCardDashboard
     },
     {
       id: 'hourly-production',
