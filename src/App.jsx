@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gauge, ClipboardList, Zap, Activity, Package, Monitor, BarChart3, Thermometer, Factory, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
+import { Gauge, ClipboardList, Zap, Activity, Package, Monitor, BarChart3, Thermometer, Factory, Layers, ChevronLeft, ChevronRight, Moon, Sun, RefreshCw, Download } from 'lucide-react';
 
 // ============================================
 // CURING OVEN DATA GENERATION
@@ -853,6 +853,191 @@ const HourlyProductionDashboard = ({ darkMode }) => {
 };
 
 // ============================================
+// EXTRUSION LINE DASHBOARD
+// ============================================
+
+const extrusionPresets = {
+  dornPreset: 'TL-1001-P049', mundstuckPreset: 'TL-1001-M052', vacuumNozzlePreset: 'TL-1001-V044',
+  dornActual: 'TL-1006-P023', mundstuckActual: 'TL-1006-M021', vacuumNozzleActual: 'TL-1006-V018',
+  mischungNumber: 'MIX-6734-720', lotNumber: 'LOT-900145*', lastDate: '10/22/2025',
+};
+
+const extrusionProcessValues = {
+  rotationSetpoint: 6.80, rotationActual: 6.76, motorCurrent: 86.0,
+  pressureCrosshead: 239, pressureHead: 136, pressureSieve: 273,
+  tempCrosshead: 64.6, vakuum: 16.2, vakuumSihi: 762,
+  tempHead: 74.3,
+};
+
+const extrusionZones = [
+  { name: 'Screw', setpoint: 75, min: 70, actual: 75, max: 80 },
+  { name: 'Cylinder 2', setpoint: 70, min: 65, actual: 70, max: 75 },
+  { name: 'Feed roller', setpoint: 65, min: 60, actual: 64.9, max: 70 },
+  { name: 'Cylinder 1', setpoint: 75, min: 70, actual: 74.7, max: 80 },
+  { name: 'Head', setpoint: 80, min: 75, actual: 79.9, max: 85 },
+];
+
+const ExtrusionLineDashboard = ({ darkMode }) => {
+  const [lineSpeedActual, setLineSpeedActual] = useState(7.88);
+  const [processVals, setProcessVals] = useState(extrusionProcessValues);
+  const [zones, setZones] = useState(extrusionZones);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLineSpeedActual(7.88 + (Math.random() - 0.5) * 0.04);
+      setProcessVals(prev => ({
+        ...prev,
+        rotationActual: 6.76 + (Math.random() - 0.5) * 0.04,
+        motorCurrent: 86.0 + (Math.random() - 0.5) * 0.5,
+        tempCrosshead: 64.6 + (Math.random() - 0.5) * 0.3,
+        tempHead: 74.3 + (Math.random() - 0.5) * 0.3,
+      }));
+      setZones(prev => prev.map(z => ({
+        ...z,
+        actual: z.actual + (Math.random() - 0.5) * 0.2,
+      })));
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const KpiCell = ({ label, value, unit, color = 'text-amber-500' }) => (
+    <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2 text-center">
+      <div className="text-[10px] text-gray-500 dark:text-gray-400 uppercase">{label}</div>
+      <div className={`text-lg font-bold ${color}`}>{value} <span className="text-xs font-normal text-gray-500">{unit}</span></div>
+    </div>
+  );
+
+  const isOk = (actual, min, max) => actual >= min && actual <= max;
+
+  return (
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          Extruder Line 6 — Upper Layer Extruder
+        </h1>
+        <div className="flex items-center gap-3">
+          <span className="px-5 py-2 bg-green-600 text-white rounded-lg font-bold text-lg">Running</span>
+          <div className="text-center">
+            <div className="text-[10px] text-gray-500 dark:text-gray-400">Line speed setpoint</div>
+            <div className="text-lg font-bold text-gray-900 dark:text-white">7 <span className="text-xs font-normal">m/min</span></div>
+          </div>
+          <div className="text-center">
+            <div className="text-[10px] text-gray-500 dark:text-gray-400">Actual line speed</div>
+            <div className="text-lg font-bold text-amber-500">{lineSpeedActual.toFixed(2)} <span className="text-xs font-normal">m/min</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left: Extruder values */}
+        <div className="space-y-3">
+          {/* Presets */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3">
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <KpiCell label="Dorn preset" value={extrusionPresets.dornPreset} unit="" color="text-amber-500" />
+              <KpiCell label="Mundstuck preset" value={extrusionPresets.mundstuckPreset} unit="" color="text-amber-500" />
+              <KpiCell label="Vacuum nozzle preset" value={extrusionPresets.vacuumNozzlePreset} unit="" color="text-amber-500" />
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <KpiCell label="Dorn actual" value={extrusionPresets.dornActual} unit="" color="text-green-500" />
+              <KpiCell label="Mundstuck actual" value={extrusionPresets.mundstuckActual} unit="" color="text-green-500" />
+              <KpiCell label="Vacuum nozzle actual" value={extrusionPresets.vacuumNozzleActual} unit="" color="text-green-500" />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <KpiCell label="Mischung number" value={extrusionPresets.mischungNumber} unit="" color="text-amber-500" />
+              <KpiCell label="Lot number" value={extrusionPresets.lotNumber} unit="" color="text-amber-500" />
+              <KpiCell label="Last date" value={extrusionPresets.lastDate} unit="" color="text-green-500" />
+            </div>
+          </div>
+
+          {/* Process values */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3">
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <KpiCell label="Extruder rotation setpoint" value={processVals.rotationSetpoint.toFixed(2)} unit="rpm" />
+              <KpiCell label="Extruder rotation actual" value={processVals.rotationActual.toFixed(2)} unit="rpm" color="text-green-500" />
+              <KpiCell label="Motor current" value={processVals.motorCurrent.toFixed(1)} unit="A" color="text-green-500" />
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <KpiCell label="Mass pressure crosshead" value={processVals.pressureCrosshead} unit="bar" color="text-green-500" />
+              <KpiCell label="Mass pressure head" value={processVals.pressureHead} unit="bar" color="text-green-500" />
+              <KpiCell label="Mass pressure sieve" value={processVals.pressureSieve} unit="bar" color="text-green-500" />
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <KpiCell label="Mass temperature crosshead" value={processVals.tempCrosshead.toFixed(1)} unit="°C" color="text-green-500" />
+              <KpiCell label="Vakuum" value={processVals.vakuum.toFixed(1)} unit="mbar" color="text-green-500" />
+              <KpiCell label="Vakuum Sihi" value={processVals.vakuumSihi} unit="mbar" color="text-green-500" />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <KpiCell label="Mass temperature head" value={processVals.tempHead.toFixed(1)} unit="°C" color="text-green-500" />
+              <div />
+              <div />
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Zone temperatures */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white text-center mb-3">Zones temperatures</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="py-2 px-2 text-left text-gray-600 dark:text-gray-400 font-normal w-28"></th>
+                  <th className="py-2 px-1 text-center text-gray-500 dark:text-gray-400 font-normal">Setpoint</th>
+                  <th className="py-2 px-1 text-center text-gray-500 dark:text-gray-400 font-normal">Minimum</th>
+                  <th className="py-2 px-1 text-center text-gray-500 dark:text-gray-400 font-normal">Actual</th>
+                  <th className="py-2 px-1 text-center text-gray-500 dark:text-gray-400 font-normal">Maximum</th>
+                  <th className="py-2 px-1 text-center text-gray-500 dark:text-gray-400 font-normal">Out of Max</th>
+                  <th className="py-2 px-1 text-center text-gray-500 dark:text-gray-400 font-normal">Out of Min</th>
+                </tr>
+              </thead>
+              <tbody>
+                {zones.map(z => {
+                  const okMax = z.actual <= z.max;
+                  const okMin = z.actual >= z.min;
+                  return (
+                    <tr key={z.name} className="border-b border-gray-100 dark:border-gray-700">
+                      <td className="py-3 px-2 font-bold text-gray-900 dark:text-white text-sm">{z.name}</td>
+                      <td className="py-3 px-1 text-center">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{z.setpoint}</span>
+                        <span className="text-[10px] text-gray-500 ml-0.5">°C</span>
+                      </td>
+                      <td className="py-3 px-1 text-center">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{z.min}</span>
+                        <span className="text-[10px] text-gray-500 ml-0.5">°C</span>
+                      </td>
+                      <td className="py-3 px-1 text-center">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{z.actual.toFixed(1)}</span>
+                        <span className="text-[10px] text-gray-500 ml-0.5">°C</span>
+                      </td>
+                      <td className="py-3 px-1 text-center">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{z.max}</span>
+                        <span className="text-[10px] text-gray-500 ml-0.5">°C</span>
+                      </td>
+                      <td className="py-3 px-1 text-center">
+                        <span className={`inline-block px-3 py-1 rounded text-xs font-bold ${okMax ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                          {okMax ? 'OK' : 'ALARM'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-1 text-center">
+                        <span className={`inline-block px-3 py-1 rounded text-xs font-bold ${okMin ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                          {okMin ? 'OK' : 'ALARM'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
 // AUTOCLAVE PROCESS VALUES DASHBOARD
 // ============================================
 
@@ -1229,6 +1414,13 @@ export default function App() {
       icon: BarChart3,
       description: 'Parts per hour with machine status',
       component: HourlyProductionDashboard
+    },
+    {
+      id: 'extrusion-line',
+      name: 'Extrusion Line',
+      icon: Layers,
+      description: 'Continuous rubber/plastic extrusion monitoring',
+      component: ExtrusionLineDashboard
     },
     {
       id: 'autoclave-process',
